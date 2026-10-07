@@ -40,6 +40,22 @@ test('the cyber theme turns the healthy meters blue, the warnings stay', () => {
   expect(tag.bg).toBe(THEMES.cyber.ok)
 })
 
+test('every theme colors the meters ok, warn, hot and draws both lines', () => {
+  for (const [name, p] of Object.entries(THEMES)) {
+    expect(meter('ctx', 30, p).find(r => r.bold)?.fg, name).toBe(p.ok)
+    expect(meter('ctx', 70, p).find(r => r.bold)?.fg, name).toBe(p.warn)
+    expect(meter('ctx', 90, p).find(r => r.bold)?.fg, name).toBe(p.hot)
+    // The tag may be mid-glitch (`CL4UDE`) on a working frame; its λ never is.
+    expect(text(identityLine({ ...FRAME, palette: p })), name).toContain(' λ ')
+    expect(text(gaugeLine({ ...FRAME, palette: p })), name).toContain('$1.37')
+  }
+})
+
+test('native paints with theme keys, so it follows light and dark themes', () => {
+  expect(Object.values(THEMES.native).every(c => !c.startsWith('#'))).toBe(true)
+  expect(identityLine({ ...FRAME, isWorking: false, palette: THEMES.native })[0]).toMatchObject({ bg: 'success', fg: 'inverseText' })
+})
+
 test('small readers', () => {
   expect(duration(42_000)).toBe('42s')
   expect(duration(83 * 60_000)).toBe('1h23m')
@@ -98,11 +114,13 @@ for (const surface of ['terminal', 'desktop'] as const) {
     expect(['#FF3860', THEMES.matrix.ok]).toContain(tag?.props.backgroundColor)
   })
 
-  test(`theme option paints the tag blue (${surface})`, { options: { theme: 'cyber' } }, async ($, on) => {
-    mock.clock(on, { now: 1_000 })
+  for (const theme of Object.keys(THEMES) as (keyof typeof THEMES)[]) {
+    test(`theme option ${theme} paints the tag (${surface})`, { options: { theme } }, async ($, on) => {
+      mock.clock(on, { now: 1_000 })
 
-    const ui = await $.ui.mount({ plugin: 'wills-status', surface, component: 'AbovePrompt', props: PROPS })
-    const tag = await ui.find({ type: 'Text', text: 'CLAUDE' })
-    expect(tag?.props.backgroundColor).toBe(THEMES.cyber.ok)
-  })
+      const ui = await $.ui.mount({ plugin: 'wills-status', surface, component: 'AbovePrompt', props: PROPS })
+      const tag = await ui.find({ type: 'Text', text: 'CLAUDE' })
+      expect(tag?.props.backgroundColor).toBe(THEMES[theme].ok)
+    })
+  }
 }

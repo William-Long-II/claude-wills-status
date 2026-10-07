@@ -2,9 +2,15 @@ import type { Activity, Git, Identity, Telemetry } from '../types'
 
 export type Run = { text: string; fg?: string; bg?: string; bold?: boolean }
 
-/** Every color the line paints. `ok` is a meter's color below 60%; amber and red stay across themes. */
+/**
+ * Every color the line paints: a hex color, or a Claude Code theme key
+ * (`success`, `warning`, ...), which follows the person's light or dark theme.
+ * A meter runs `ok` below 60%, `warn` below 85%, `hot` above.
+ */
 export type Palette = {
   ok: string
+  warn: string
+  hot: string
   working: string
   feed: string
   scramble: string
@@ -20,6 +26,8 @@ export type Palette = {
 export const THEMES = {
   matrix: {
     ok: '#00FF9C',
+    warn: '#FFB000',
+    hot: '#FF3860',
     working: '#00E5FF',
     feed: '#00E5FF',
     scramble: '#0F8F5A',
@@ -33,6 +41,8 @@ export const THEMES = {
   },
   cyber: {
     ok: '#00D9FF',
+    warn: '#FFB000',
+    hot: '#FF3860',
     working: '#B388FF',
     feed: '#5CC8FF',
     scramble: '#1F6FB2',
@@ -44,13 +54,58 @@ export const THEMES = {
     git: '#FF79C6',
     cost: '#B388FF',
   },
+  // Claude Code's own theme keys: right on light, dark and colorblind themes alike.
+  native: {
+    ok: 'success',
+    warn: 'warning',
+    hot: 'error',
+    working: 'claude',
+    feed: 'suggestion',
+    scramble: 'inactive',
+    dim: 'subtle',
+    muted: 'inactive',
+    track: 'subtle',
+    tagInk: 'inverseText',
+    model: 'permission',
+    git: 'merged',
+    cost: 'planMode',
+  },
+  // Monochrome phosphor: dim amber, brightening as it fills, red at the end.
+  amber: {
+    ok: '#CC8A00',
+    warn: '#FFC94D',
+    hot: '#FF4A2E',
+    working: '#FFD27A',
+    feed: '#FFB000',
+    scramble: '#7A5200',
+    dim: '#5C4720',
+    muted: '#A68A55',
+    track: '#2E2410',
+    tagInk: '#140D00',
+    model: '#FFC94D',
+    git: '#FFD27A',
+    cost: '#FFB000',
+  },
+  // '80s neon: a pink tag, a sunset across the meters, cyan and sun-yellow accents.
+  synthwave: {
+    ok: '#FF2E97',
+    warn: '#FF9E3D',
+    hot: '#FF3B3B',
+    working: '#B967FF',
+    feed: '#00F0FF',
+    scramble: '#7B2CBF',
+    dim: '#5A3E7A',
+    muted: '#A88BC7',
+    track: '#2A1340',
+    tagInk: '#14001F',
+    model: '#00F0FF',
+    git: '#B967FF',
+    cost: '#FFD319',
+  },
 } satisfies Record<string, Palette>
 
 export type ThemeName = keyof typeof THEMES
 export const themeOf = (name: unknown): Palette => THEMES[name as ThemeName] ?? THEMES.matrix
-
-export const AMBER = '#FFB000'
-export const RED = '#FF3860'
 
 const SPINNER = [...'⣾⣽⣻⢿⡿⣟⣯⣷']
 const GLYPHS = [...'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉ0123456789ABCDEF']
@@ -64,7 +119,7 @@ const TAG_TEXT = ' λ CLAUDE '
 /** A stable pseudo-random number per frame and slot, so a frame always draws the same. */
 const noise = (frame: number, slot: number) => (((frame + 1) * 2654435761 + slot * 40503) >>> 0) % 997
 
-export const heat = (percent: number, p: Palette) => (percent < 60 ? p.ok : percent < 85 ? AMBER : RED)
+export const heat = (percent: number, p: Palette) => (percent < 60 ? p.ok : percent < 85 ? p.warn : p.hot)
 
 export const width = (runs: readonly Run[]) => runs.reduce((n, r) => n + [...r.text].length, 0)
 
@@ -128,7 +183,7 @@ const tag = (frame: number, isWorking: boolean, isAlerting: boolean, p: Palette)
     const i = 3 + (noise(frame, 0) % 6)
     letters[i] = LEET[letters[i]] ?? letters[i]
   }
-  const bg = isAlerting && frame % 2 === 0 ? RED : isWorking ? p.working : p.ok
+  const bg = isAlerting && frame % 2 === 0 ? p.hot : isWorking ? p.working : p.ok
 
   return { text: letters.join(''), fg: p.tagInk, bg, bold: true }
 }
@@ -137,8 +192,8 @@ const gitSegment = (g: Git, p: Palette): Run[] => [
   { text: '⎇ ', fg: p.git },
   { text: g.branch, fg: p.git, bold: true },
   ...(g.ahead ? [{ text: ` ↑${g.ahead}`, fg: p.feed }] : []),
-  ...(g.behind ? [{ text: ` ↓${g.behind}`, fg: AMBER }] : []),
-  g.dirty ? { text: ` ±${g.dirty}`, fg: AMBER } : { text: ' ✓', fg: p.ok },
+  ...(g.behind ? [{ text: ` ↓${g.behind}`, fg: p.warn }] : []),
+  g.dirty ? { text: ` ±${g.dirty}`, fg: p.warn } : { text: ' ✓', fg: p.ok },
 ]
 
 /** The live feed: spinner, tool, its argument, a tail of scrambling glyphs. */

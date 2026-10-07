@@ -42,14 +42,17 @@ Pick one in `/config` under **wills-status → Theme**:
 | --- | --- |
 | `matrix` (default) | Neon green, cyan while working |
 | `cyber` | Electric blue, violet while working |
+| `native` | Your Claude Code theme's own colors. **Use this on a light terminal.** |
+| `amber` | Monochrome retro CRT: dim amber brightening to gold, red at the top |
+| `synthwave` | Hot pink and purple, with a pink-to-orange-to-red sunset on the meters |
 
-The usage meters keep amber and red as their warning colors in both themes.
+In every theme, the meters move through three colors as they fill: healthy below 60%, a warning color below 85%, and an alarm color above that.
 
 ## Notes
 
 - **Requirements**: Claude Code 2.1.292 or newer, which has function-hook plugins (early access).
 - **Usage meters**: the 5h and 7d meters appear only on a Claude subscription, after the first reply of a session.
-- **Colors**: the colors are tuned for dark terminal themes. Terminals with 24-bit color show them exactly (Windows Terminal, iTerm2, Ghostty, WezTerm, Kitty). Older Terminal.app versions round them to the nearest of 256.
+- **Colors**: every theme except `native` is tuned for dark terminal backgrounds. Terminals with 24-bit color show them exactly (Windows Terminal, iTerm2, Ghostty, WezTerm, Kitty). Older Terminal.app versions round them to the nearest of 256.
 - **Collapsing**: collapse the band with `[-]` or `ctrl+x ctrl+a`.
 
 ## Develop
