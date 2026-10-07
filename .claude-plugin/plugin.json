@@ -1,0 +1,16 @@
+{
+  "name": "wills-status",
+  "version": "1.0.0",
+  "description": "A two-line hacker HUD above the Claude Code prompt: model, git and a live tool feed; context, 5h and 7d meters with usage alerts, cost and uptime",
+  "author": { "name": "Will" },
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "theme": {
+      "type": "string",
+      "title": "Theme",
+      "description": "matrix: neon green. cyber: electric blue.",
+      "default": "matrix",
+      "options": ["matrix", "cyber"]
+    }
+  }
+}

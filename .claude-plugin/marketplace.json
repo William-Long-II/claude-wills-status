@@ -1,0 +1,6 @@
+{
+  "name": "wills-status",
+  "description": "Will's Claude Code mods",
+  "owner": { "name": "Will" },
+  "plugins": [{ "name": "wills-status", "source": "./" }]
+}
