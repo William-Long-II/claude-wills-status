@@ -29,7 +29,7 @@ On a narrow terminal each line drops its lowest-priority segments first instead 
 In a Claude Code terminal session:
 
 ```
-/plugin install wills-status --marketplace <github-user>/claude-wills-status
+/plugin install wills-status --marketplace William-Long-II/claude-wills-status
 ```
 
 Answer `y` to add the marketplace, then pick a scope (user scope loads it in every session). It starts drawing right away.
